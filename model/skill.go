@@ -4,5 +4,6 @@ import "gorm.io/gorm"
 
 type Skill struct {
 	gorm.Model
-	What string
+	Topic string
+	What  string
 }

@@ -3,9 +3,9 @@ package main
 import (
 	"fmt"
 	"os"
-	"time"
 
 	"github.com/rchirinos11/golearn/model"
+	"github.com/rchirinos11/golearn/service"
 
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
@@ -18,42 +18,25 @@ func main() {
 	}
 	db.AutoMigrate(&model.Skill{})
 
-	parseArgs(db)
+	service := service.SkillService{DB: db}
+	parseArgs(&service)
 }
 
-func parseArgs(db *gorm.DB) {
+func parseArgs(service *service.SkillService) {
 	args := os.Args
-	if len(args) == 1 {
-		fmt.Println("I have no args!")
-		return
+	if len(args) < 2 {
+		fmt.Println("No args provided")
+		os.Exit(1)
 	}
-
 	switch args[1] {
 	case "add":
-		addSkill(db)
+		service.AddSkill()
 	case "list":
-		listSkills(db)
+		service.PrintSkills()
+	case "delete_all":
+		service.DeleteAll()
 	default:
-		fmt.Println("I don't know what you want me to do!")
+		fmt.Printf("%s is not a valid argument\n", args[1])
+		os.Exit(2)
 	}
-}
-
-func listSkills(db *gorm.DB) {
-	var skills []model.Skill
-	db.Find(&skills)
-	fmt.Println("In total, you have learnt:")
-	fmt.Println("===========================================")
-	fmt.Printf("%-15s %s\n", "What", "When")
-	for _, skill := range skills {
-		fmt.Printf("%-15s %s\n", skill.What, skill.CreatedAt.Format(time.UnixDate))
-	}
-}
-
-func addSkill(db *gorm.DB) {
-	var newSkill model.Skill
-	fmt.Println("What have you learnt today?")
-	fmt.Scan(&newSkill.What)
-	fmt.Println("You have learnt:", newSkill.What)
-
-	db.Create(&newSkill)
 }
