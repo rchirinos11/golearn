@@ -33,6 +33,12 @@ func parseArgs(service *service.SkillService) {
 		service.AddSkill()
 	case "list":
 		service.PrintSkills()
+	case "del":
+		service.DeleteOne(args)
+	case "edit":
+		service.Edit(args)
+	case "bydate":
+		service.PrintByDate()
 	case "delete_all":
 		service.DeleteAll()
 	default:

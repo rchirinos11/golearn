@@ -1,9 +1,9 @@
 package service
 
 import (
-	"bufio"
 	"fmt"
 	"os"
+	"strconv"
 	"strings"
 	"time"
 
@@ -15,9 +15,9 @@ type Service interface {
 	AddSkill()
 	PrintSkills()
 	DeleteAll() error
-	Edit()
+	Edit(args []string)
 	PrintByDate()
-	DeleteOne()
+	DeleteOne(args []string)
 }
 
 type SkillService struct {
@@ -25,19 +25,8 @@ type SkillService struct {
 }
 
 func (sr *SkillService) AddSkill() {
-	var newSkill model.Skill
-	reader := bufio.NewReader(os.Stdin)
-
-	fmt.Println("What have you learnt today?")
-	fmt.Print("Topic: ")
-	fmt.Scan(&newSkill.Topic)
-
-	fmt.Print("What: ")
-	text, _ := reader.ReadString('\n')
-	newSkill.What = strings.TrimSpace(text)
-
+	newSkill := model.ReadSkill()
 	fmt.Println("Saving...")
-
 	sr.DB.Create(&newSkill)
 }
 
@@ -49,8 +38,8 @@ func (sr *SkillService) PrintSkills() {
 	fmt.Printf("%-5s %-12s %-40s %s\n", "Index", "Topic", "What", "When")
 	printSeparator()
 
-	for i, skill := range skills {
-		fmt.Printf("%-5d %-12s %-40s %s\n", i+1, skill.Topic, skill.What, skill.CreatedAt.Format(time.UnixDate))
+	for _, skill := range skills {
+		fmt.Printf("%-5d %-12s %-40s %s\n", skill.ID, skill.Topic, skill.What, skill.CreatedAt.Format(time.UnixDate))
 	}
 }
 
@@ -65,6 +54,34 @@ func (sr *SkillService) DeleteAll() {
 	fmt.Print("This is meant for testing only, I will literally delete the db file, are you really sure? (y/N) ")
 	if evalInput() {
 		os.Remove("../bkp.db")
+	}
+}
+
+func (sr *SkillService) DeleteOne(args []string) {
+	modifierArgError(args)
+	sr.DB.Delete(&model.Skill{}, args[2])
+}
+
+func (sr *SkillService) Edit(args []string) {
+	modifierArgError(args)
+	id, err := strconv.ParseUint(args[2], 10, 0)
+	if err != nil {
+		fmt.Println("Error: ", err)
+		os.Exit(4)
+	}
+	updated := model.ReadSkill()
+	updated.ID = uint(id)
+	sr.DB.Save(&updated)
+}
+
+func (sr *SkillService) PrintByDate() {
+}
+
+func modifierArgError(args []string) {
+	if len(args) < 3 {
+		fmt.Println("Please provide an id for this option")
+		fmt.Println("Format: golearn <option> <id>")
+		os.Exit(3)
 	}
 }
 
