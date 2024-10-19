@@ -53,7 +53,7 @@ func (sr *SkillService) DeleteAll() {
 	}
 	fmt.Print("This is meant for testing only, I will literally delete the db file, are you really sure? (y/N) ")
 	if evalInput() {
-		os.Remove("../bkp.db")
+		os.Remove("../test.db")
 	}
 }
 

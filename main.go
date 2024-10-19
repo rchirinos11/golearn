@@ -3,8 +3,10 @@ package main
 import (
 	"fmt"
 	"os"
+	"time"
 
 	"github.com/rchirinos11/golearn/model"
+	"github.com/rchirinos11/golearn/notify"
 	"github.com/rchirinos11/golearn/service"
 
 	"gorm.io/driver/sqlite"
@@ -28,7 +30,11 @@ func parseArgs(service *service.SkillService) {
 		fmt.Println("No args provided")
 		os.Exit(1)
 	}
+
 	switch args[1] {
+	case "start":
+		go start(service)
+		select {}
 	case "add":
 		service.AddSkill()
 	case "list":
@@ -44,5 +50,19 @@ func parseArgs(service *service.SkillService) {
 	default:
 		fmt.Printf("%s is not a valid argument\n", args[1])
 		os.Exit(2)
+	}
+}
+
+func start(service *service.SkillService) {
+	notifyCmd := notify.InitNotifier()
+	interval := time.Hour * 5
+	fmt.Println("Finished startup")
+
+	for {
+		select {
+		case <-time.Tick(interval):
+			notifyCmd.Notify("Golearn", "Stop being lazy")
+			service.AddSkill()
+		}
 	}
 }
