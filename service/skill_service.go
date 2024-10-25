@@ -26,8 +26,8 @@ type SkillService struct {
 
 func (sr *SkillService) AddSkill() {
 	newSkill := model.ReadSkill()
-	fmt.Println("Saving...")
 	sr.DB.Create(&newSkill)
+	fmt.Println("Saved")
 }
 
 func (sr *SkillService) PrintSkills() {

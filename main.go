@@ -55,14 +55,20 @@ func parseArgs(service *service.SkillService) {
 
 func start(service *service.SkillService) {
 	notifyCmd := notify.InitNotifier()
-	interval := time.Hour * 5
-	fmt.Println("Finished startup")
+	interval := time.Hour * 4
+	fmt.Println("Started service, recurrence:", interval)
+	printNext(interval)
 
 	for {
 		select {
 		case <-time.Tick(interval):
 			notifyCmd.Notify("Golearn", "Stop being lazy")
 			service.AddSkill()
+			printNext(interval)
 		}
 	}
+}
+
+func printNext(interval time.Duration) {
+	fmt.Println("Next notification at", time.Now().Add(interval).Format("15:04:05"))
 }
