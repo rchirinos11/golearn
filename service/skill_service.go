@@ -34,13 +34,7 @@ func (sr *SkillService) PrintSkills() {
 	var skills []model.Skill
 	sr.DB.Find(&skills)
 	fmt.Println("In total, you have learnt:")
-	printSeparator()
-	fmt.Printf("%-5s %-12s %-40s %s\n", "Index", "Topic", "What", "When")
-	printSeparator()
-
-	for _, skill := range skills {
-		fmt.Printf("%-5d %-12s %-40s %s\n", skill.ID, skill.Topic, skill.What, skill.CreatedAt.Format(time.UnixDate))
-	}
+	printList(skills)
 }
 
 func (sr *SkillService) DeleteAll() {
@@ -74,7 +68,35 @@ func (sr *SkillService) Edit(args []string) {
 	sr.DB.Save(&updated)
 }
 
-func (sr *SkillService) PrintByDate() {
+func (sr *SkillService) FilterBy(args []string, opt int) {
+	modifierArgError(args)
+
+	var skills []model.Skill
+	var filter string
+	switch opt {
+	case 0:
+		filter = "topic"
+	case 1:
+		filter = "id"
+	case 2:
+		filter = "date"
+	default:
+		fmt.Println("Filter not configured")
+		return
+	}
+	sr.DB.Where(filter+" = ?", args[2]).Find(&skills)
+	fmt.Printf("Filtered by %s: %s\n", filter, args[2])
+	printList(skills)
+}
+
+func printList(skills []model.Skill) {
+	printSeparator()
+	fmt.Printf("%-5s %-12s %-60s %s\n", "Index", "Topic", "What", "When")
+	printSeparator()
+
+	for _, skill := range skills {
+		fmt.Printf("%-5d %-12s %-60s %s\n", skill.ID, skill.Topic, skill.What, skill.CreatedAt.Format(time.UnixDate))
+	}
 }
 
 func modifierArgError(args []string) {
@@ -102,7 +124,7 @@ func evalInput() bool {
 }
 
 func printSeparator() {
-	for i := 0; i < 90; i++ {
+	for i := 0; i < 110; i++ {
 		fmt.Print("=")
 	}
 	fmt.Println()
